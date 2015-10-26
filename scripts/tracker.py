@@ -29,7 +29,7 @@ class Tracker(object):
         cv2.setMouseCallback('video_window', self.process_mouse_event)
         cv2.namedWindow('threshold_image')
         # (90, 193, 21, 72, 202, 255)
-        # ( np.array([23,175,130]), np.array([32,255,255]) ) bgr
+        # bgr (15, 162, 78) (37, 255, 255)  bgr
         self.red_lower_bound = 130
         self.red_upper_bound = 225
         self.blue_lower_bound = 23
@@ -75,14 +75,16 @@ class Tracker(object):
         self.cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
         # print self.cv_image.shape
         self.hsv_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2HSV)
-        binary_image = cv2.inRange(self.hsv_image, (self.blue_lower_bound, self.green_lower_bound, self.red_lower_bound), (self.blue_upper_bound, self.green_upper_bound, self.red_upper_bound))
-        moments = cv2.moments(binary_image)
-        if moments['m00'] != 0:
-            self.center_x, self.center_y = moments['m10']/moments['m00'], moments['m01']/moments['m00']
-        cv2.circle(self.cv_image, (int(self.center_x), int(self.center_y)), 1000,(0,0,225) , 1)
+        # binary_image = cv2.inRange(self.hsv_image, (self.blue_lower_bound, self.green_lower_bound, self.red_lower_bound), (self.blue_upper_bound, self.green_upper_bound, self.red_upper_bound))
+        # moments = cv2.moments(binary_image)
+        # if moments['m00'] != 0:
+        #     self.center_x, self.center_y = moments['m10']/moments['m00'], moments['m01']/moments['m00']
+        # cv2.circle(self.cv_image, (int(self.center_x), int(self.center_y)), 1000,(0,0,225) , 1)
         # print self.center_x, self.center_y
+
+        cv2.imwrite("images/right_turn_robot.png", self.cv_image) 
         cv2.imshow('video_window', self.cv_image)
-        cv2.imshow('threshold_image', binary_image)
+        # cv2.imshow('threshold_image', binary_image)
         
         cv2.waitKey(5)
 
