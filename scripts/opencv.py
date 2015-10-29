@@ -2,9 +2,8 @@ import cv2
 import numpy as np
 
 
-im = cv2.imread('../images/left_turn_robot.png', 1)
-# height, width = im.shape[:2]
-# print height, width
+im = cv2.imread('../images/right_turn_robot.png', 1)
+
 hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
 # hsv bounds for red blue and green
@@ -23,10 +22,7 @@ if moments['m00'] != 0:
     center_x, center_y = moments['m10']/moments['m00'], moments['m01']/moments['m00']
 print center_x, center_x
 imgray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
-# cv2.circle(mask, (int(center_x), int(center_y)), 3,(0,255,0) , 2)
-# ret,thresh = cv2.threshold(hsv,127,255,0)
 
-# cv2.imshow("mask", mask)
 maxM = 0
 maxC = 0
 x,y = 0, 0
@@ -50,28 +46,9 @@ width = rightmost[0] - leftmost[0]
 height = bottommost[1] - topmost[1]
 print width, height
 xr, yr = x - width/2, y - height/2
-out = mask[ yr:yr + height, xr: xr + width ]
+out = imgray[ yr:yr + height, xr: xr + width ]
 cv2.imshow("out", out)
 
-edges = cv2.Canny(out,100,200)
-
-cv2.imshow("edges", edges)
-sobelx64f = cv2.Sobel(edges,cv2.CV_64F,1,0,ksize=5)
-sobely64f = cv2.Sobel(edges,cv2.CV_64F,0,1,ksize=5)
-x_abs_sobel64f = np.absolute(sobelx64f)
-x_sobel_8u = np.uint8(x_abs_sobel64f)
-
-cv2.imshow("x", sobelx64f)
-cv2.imshow("sc", x_sobel_8u)
-# cv2.imshow("y", sobely)
-
-# cv2.imshow("image", im)
-# cv2.imshow("mask", mask)
-# cv2.imshow("contours", im2)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-
-# edges = cv2.Canny(imgray,100,200)
-# ret,thresh = cv2.threshold(imgray,127,255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-# contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
