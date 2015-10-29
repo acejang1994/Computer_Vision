@@ -6,7 +6,7 @@ import cv2
 import pickle
 import numpy as np
 import rospkg
-
+from scipy import stats
 
 class KeyPointMatcherDemo(object):
 	""" KeyPointMatcherDemo shows the basics of interest point detection,
@@ -61,8 +61,20 @@ class KeyPointMatcherDemo(object):
 			pts1[idx,:] = kp1[match[0]].pt
 			pts2[idx,:] = kp2[match[1]].pt
 
-		print pts1
+		print pts1.shape[0]
 		print pts2
+
+		x1, x2, y1, y2 = [], [], [], []
+
+		for i in range(pts1.shape[0]):
+			x1.append(pts1[i, 0])
+			x2.append(pts2[i, 0])
+			y1.append(pts1[i, 1])
+			y2.append(pts2[i, 1])
+
+		slope1, intercept1, r_value1, p_value1, std_err1 = stats.linregress(x1,x2)
+		slope2, intercept2, r_value2, p_value2, std_err2 = stats.linregress(y1,y2)
+		print r_value1, r_value2
 
 		self.im = np.array(np.hstack((im1,im2)))
 
@@ -130,7 +142,8 @@ if __name__ == '__main__':
 	xr, yr = x - width/2, y - height/2
 	out = im[ yr:yr + height, xr: xr + width ]
 
-	matcher = KeyPointMatcherDemo('left_turn.png', out,'SIFT')
+	# matcher = KeyPointMatcherDemo('left_turn.png', out,'SIFT')
+	matcher = KeyPointMatcherDemo('right_turn.jpg', out,'SIFT')
 
 	# setup a basic UI
 	cv2.namedWindow('UI')
