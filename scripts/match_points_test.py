@@ -14,9 +14,9 @@ class KeyPointMatcher(object):
 	def __init__(self, im1_file, robot_file):
 		rospack = rospkg.RosPack()
 		self.im1_file = rospack.get_path('computer_vision') + '/images/' + im1_file
-		# self.im2_file = rospack.get_path('computer_vision') + '/images/' + robot_file
+		self.im2_file = rospack.get_path('computer_vision') + '/images/' + robot_file
 
-		self.robot_file = robot_file
+		# self.robot_file = robot_file
 		descriptor_name = "SIFT"
 
 		self.detector = cv2.FeatureDetector_create(descriptor_name)
@@ -31,9 +31,9 @@ class KeyPointMatcher(object):
 	def compute_matches(self):
 		""" reads in two image files and computes possible matches between them using SIFT """
 		im1 = cv2.imread(self.im1_file)
-		# im2 = cv2.imread(self.im2_file)
+		im2 = cv2.imread(self.im2_file)
 
-		im2 = self.robot_file
+		# im2 = self.robot_file
 
 		height, width = im2.shape[:2]
 		im1 = cv2.resize(im1,(width, height), interpolation = cv2.INTER_CUBIC)
@@ -79,10 +79,10 @@ class KeyPointMatcher(object):
 		slope1, intercept1, r_value1, p_value1, std_err1 = stats.linregress(x1,x2)
 		slope2, intercept2, r_value2, p_value2, std_err2 = stats.linregress(y1,y2)
 
-		return r_value1**2, r_value2**2
-		# print r_value1**2, r_value2**2
+		# return r_value1**2, r_value2**2
+		print r_value1**2, r_value2**2
 
-		# self.im = np.array(np.hstack((im1,im2)))
+		self.im = np.array(np.hstack((im1,im2)))
 
 		# plot the points
 		for i in range(pts1.shape[0]):
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 	# descriptor can be: SIFT, SURF, BRIEF, BRISK, ORB, FREAK
 
 	# matcher = KeyPointMatcher('left_turn.png', out,'SIFT')
-	matcher = KeyPointMatcher('right_turn_real.png', 'right_turn_check.png')
+	matcher = KeyPointMatcher('left_turn_real.png', 'right_turn_check.png')
 
 	# setup a basic UI
 	cv2.namedWindow('UI')

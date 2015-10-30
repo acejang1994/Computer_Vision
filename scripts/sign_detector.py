@@ -8,8 +8,10 @@ class SignDetector(object):
 	def __init__(self, im):
 		self.im = im
 		hsv = cv2.cvtColor(self.im, cv2.COLOR_BGR2HSV)
-		lower_yellow = np.uint8([15, 162, 78])
-		upper_yellow = np.uint8([37, 255, 255])
+		# 15, 160, 100
+		# 50, 255, 255
+		lower_yellow = np.uint8([15, 162, 100])
+		upper_yellow = np.uint8([50, 255, 255])
 		self.mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
 		self.center_x, self.center_y = 0, 0
 
@@ -36,5 +38,5 @@ class SignDetector(object):
 		width = rightmost[0] - leftmost[0]
 		height = bottommost[1] - topmost[1]
 		xr, yr = self.center_x - width/2,  self.center_y - height/2
-		out = im[ yr:yr + height, xr: xr + width ]
+		out = self.im[ yr:yr + height, xr: xr + width ]
 		return out
