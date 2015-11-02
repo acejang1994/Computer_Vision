@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-""" A demo that shows how keypoint matches work using SIFT """
-
 import cv2
 import pickle
 import numpy as np
@@ -11,33 +9,76 @@ from scipy import stats
 class KeyPointMatcher(object):
 	""" KeyPointMatcher shows the basics of interest point detection,
 	    descriptor extraction, and descriptor matching in OpenCV """
-	def __init__(self, im1_file, robot_file):
+	def __init__(self, robot_file):
 		rospack = rospkg.RosPack()
-		self.im1_file = rospack.get_path('computer_vision') + '/images/' + im1_file
-		# self.im2_file = rospack.get_path('computer_vision') + '/images/' + robot_file
+
+		# loads the stock images for left, right and uturn signs 
+		self.left_turn = rospack.get_path('computer_vision') + '/images/left_turn_real.png'
+		self.right_turn = rospack.get_path('computer_vision') + '/images/right_turn_real.png'
+		self.u_turn = rospack.get_path('computer_vision') + '/images/uturn_real.png'
 
 		self.robot_file = robot_file
 		descriptor_name = "SIFT"
+
+		self.left_sum = 0
+		self.right_sum = 0
+		self.u_sum = 0
+
+		self.threshold_sum = 20
 
 		self.detector = cv2.FeatureDetector_create(descriptor_name)
 		self.extractor = cv2.DescriptorExtractor_create(descriptor_name)
 		self.matcher = cv2.BFMatcher()
 		self.im = None
 
-
 		self.corner_threshold = 0.01
 		self.ratio_threshold = .6
 
-	def compute_matches(self):
-		""" reads in two image files and computes possible matches between them using SIFT """
-		im1 = cv2.imread(self.im1_file)
-		# im2 = cv2.imread(self.im2_file)
+	def set_robot_file(self, robot_file):
+		""" Sets the image read from the neato's camera """
+		self.robot_file = robot_file
+
+	def compare_signs(self):
+		""" computes the running sum of each sign value """
+		left_turn = cv2.imread(self.left_turn)
+		right_turn = cv2.imread(self.right_turn)
+		u_turn = cv2.imread(self.u_turn)
+
+		self.left_sum += self.compute_matches(left_turn)
+		self.right_sum += self.compute_matches(right_turn)
+		self.u_sum += self.compute_matches(u_turn)
+
+		return self.determine_sign()
+
+	def determine_sign(self):
+		""" determines signs by looking at the running sum """
+
+		# since there are some errors when identifying with sift we take the running sum and 
+		# returns the sign that pass the threshold_sum the quickest
+		if self.left_sum > self.threshold_sum:
+			self.reset_sums()
+			return "left"
+		if self.right_sum > self.threshold_sum:
+			self.reset_sums()
+			return "right"
+		if self.u_sum > self.threshold_sum:
+			self.reset_sums()
+			return "u_turn"
+		return "None"
+
+	def reset_sums(self):
+		self.left_sum = 0
+		self.right_sum = 0
+		self.u_sum = 0
+
+	def compute_matches(self, im):
+		""" reads in a stock image file and the robot image and computes possible matches between them using SIFT """
 
 		im2 = self.robot_file
 
+		# resize the stock pictures to the robot image's size
 		height, width = im2.shape[:2]
-		im1 = cv2.resize(im1,(width, height), interpolation = cv2.INTER_CUBIC)
-
+		im1 = cv2.resize(im,(width, height), interpolation = cv2.INTER_CUBIC)
 
 		im1_bw = cv2.cvtColor(im1,cv2.COLOR_BGR2GRAY)
 		im2_bw = cv2.cvtColor(im2,cv2.COLOR_BGR2GRAY)
@@ -74,54 +115,12 @@ class KeyPointMatcher(object):
 			y1.append(pts1[i, 1])
 			y2.append(pts2[i, 1])
 
-		print "length", pts1.shape[0]
-
+		# use linear regression to determine how closely the two images match each other
 		slope1, intercept1, r_value1, p_value1, std_err1 = stats.linregress(x1,x2)
 		slope2, intercept2, r_value2, p_value2, std_err2 = stats.linregress(y1,y2)
 
-		return r_value1**2, r_value2**2
-		# print r_value1**2, r_value2**2
-
-		# self.im = np.array(np.hstack((im1,im2)))
-
-		# plot the points
-		for i in range(pts1.shape[0]):
-			cv2.circle(self.im,(int(pts1[i,0]),int(pts1[i,1])),2,(255,0,0),2)
-			cv2.circle(self.im,(int(pts2[i,0]+im1.shape[1]),int(pts2[i,1])),2,(255,0,0),2)
-			cv2.line(self.im,(int(pts1[i,0]),int(pts1[i,1])),(int(pts2[i,0]+im1.shape[1]),int(pts2[i,1])),(0,255,0))
-
-def set_corner_threshold(thresh):
-	""" Sets the threshold to consider an interest point a corner.  The higher the value
-		the more the point must look like a corner to be considered """
-	global matcher
-	matcher.corner_threshold = thresh/1000.0
-
-def set_ratio_threshold(ratio):
-	""" Sets the ratio of the nearest to the second nearest neighbor to consider the match a good one """
-	global matcher
-	matcher.ratio_threshold = ratio/100.0
-
-def mouse_event(event,x,y,flag,im):
-	""" Handles mouse events.  In this case when the user clicks, the matches are recomputed """
-	if event == cv2.EVENT_FLAG_LBUTTON:
-		matcher.compute_matches()
-
-if __name__ == '__main__':
-	# descriptor can be: SIFT, SURF, BRIEF, BRISK, ORB, FREAK
-
-	# matcher = KeyPointMatcher('left_turn.png', out,'SIFT')
-	matcher = KeyPointMatcher('right_turn_real.png', 'right_turn_check.png')
-
-	# setup a basic UI
-	cv2.namedWindow('UI')
-	cv2.createTrackbar('Corner Threshold', 'UI', 0, 100, set_corner_threshold)
-	cv2.createTrackbar('Ratio Threshold', 'UI', 100, 100, set_ratio_threshold)
-	matcher.compute_matches()
-
-	cv2.imshow("MYWIN",matcher.im)
-	cv2.setMouseCallback("MYWIN",mouse_event,matcher)
-
-	while True:
-		cv2.imshow("MYWIN",matcher.im)
-		cv2.waitKey(50)
-	cv2.destroyAllWindows()
+		# r^2 is a constant that represents the strength of the correlation
+		# return 1 for match when both of the r^2 value is greater and .95
+		if (r_value1**2 > .95 and r_value2**2 > .95):
+			return 1
+		return 0

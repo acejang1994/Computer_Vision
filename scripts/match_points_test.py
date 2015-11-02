@@ -111,7 +111,8 @@ if __name__ == '__main__':
 
 	# matcher = KeyPointMatcher('left_turn.png', out,'SIFT')
 	matcher = KeyPointMatcher('left_turn_real.png', 'right_turn_check.png')
-
+	matcher = KeyPointMatcher('uturn_real.png', 'u_turn_check.png')
+	
 	# setup a basic UI
 	cv2.namedWindow('UI')
 	cv2.createTrackbar('Corner Threshold', 'UI', 0, 100, set_corner_threshold)
