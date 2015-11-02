@@ -6,8 +6,8 @@ import numpy as np
 import rospkg
 from scipy import stats
 
-class KeyPointMatcher(object):
-	""" KeyPointMatcher shows the basics of interest point detection,
+class SignMatcher(object):
+	""" SignMatcher shows the basics of interest point detection,
 	    descriptor extraction, and descriptor matching in OpenCV """
 	def __init__(self, robot_file):
 		rospack = rospkg.RosPack()

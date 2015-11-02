@@ -5,7 +5,7 @@ from sensor_msgs.msg import Image
 from copy import deepcopy
 from cv_bridge import CvBridge
 from sign_detector import SignDetector
-from match_points import KeyPointMatcher
+from match_points import SignMatcher
 import cv2
 import numpy as np
 from geometry_msgs.msg import Twist, Vector3
@@ -21,7 +21,7 @@ class SignTracker(object):
         self.bridge = CvBridge()                    # used to convert ROS messages to OpenCV
 
         # matcher needs to be created but since the cropped image is not yet available initialize the matcher with None
-        self.matcher = KeyPointMatcher(None)
+        self.matcher = SignMatcher(None)
 
         self.maxContour = 0
         self.maxCArea = 0
