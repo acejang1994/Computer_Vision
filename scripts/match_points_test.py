@@ -82,13 +82,16 @@ class KeyPointMatcher(object):
 		# return r_value1**2, r_value2**2
 		print r_value1**2, r_value2**2
 
-		self.im = np.array(np.hstack((im1,im2)))
+		# self.im = np.array(np.hstack((im1,im2)))
+		self.im = im1
 
 		# plot the points
 		for i in range(pts1.shape[0]):
-			cv2.circle(self.im,(int(pts1[i,0]),int(pts1[i,1])),2,(255,0,0),2)
-			cv2.circle(self.im,(int(pts2[i,0]+im1.shape[1]),int(pts2[i,1])),2,(255,0,0),2)
-			cv2.line(self.im,(int(pts1[i,0]),int(pts1[i,1])),(int(pts2[i,0]+im1.shape[1]),int(pts2[i,1])),(0,255,0))
+			cv2.circle(self.im,(int(pts1[i,0]),int(pts1[i,1])),3,(255,0,0),2)
+			# cv2.circle(self.im,(int(pts2[i,0]+im1.shape[1]),int(pts2[i,1])),2,(255,0,0),2)
+			# cv2.line(self.im,(int(pts1[i,0]),int(pts1[i,1])),(int(pts2[i,0]+im1.shape[1]),int(pts2[i,1])),(0,255,0))
+
+		cv2.imwrite("/home/bumho/catkin_ws/src/comprobo15/computer_vision/images/u_turn_sift.png", im1)
 
 def set_corner_threshold(thresh):
 	""" Sets the threshold to consider an interest point a corner.  The higher the value
@@ -110,8 +113,8 @@ if __name__ == '__main__':
 	# descriptor can be: SIFT, SURF, BRIEF, BRISK, ORB, FREAK
 
 	# matcher = KeyPointMatcher('left_turn.png', out,'SIFT')
-	matcher = KeyPointMatcher('left_turn_real.png', 'right_turn_check.png')
-	matcher = KeyPointMatcher('uturn_real.png', 'u_turn_check.png')
+	matcher = KeyPointMatcher('uturn_real.png', 'right_turn_check.png')
+	# matcher = KeyPointMatcher('uturn_real.png', 'u_turn_check.png')
 	
 	# setup a basic UI
 	cv2.namedWindow('UI')
